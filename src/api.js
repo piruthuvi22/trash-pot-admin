@@ -11,7 +11,7 @@ const placesTypesApi = [
       "school",
       "ground",
     ],
-  },
+  },  
 
   {
     area: "Pamankada East",
@@ -94,4 +94,25 @@ const spotsApi = [
     Longitude: " 79.87678475607808",
   },
 ];
+
+let data = {
+  0: {
+    Location: "moh d4 office",
+    "Ward name": "Kirula",
+    "location type": "office",
+    "Longatiude Lattatude": "6.8930386828508565, 79.87130456698263",
+    Latitude: "6.8930386828508565",
+    Longitude: " 79.87130456698263",
+  },
+  1: {
+    Location: "podj",
+    "Ward name": "Kirula",
+    "location type": "restaurant",
+    "Longatiude Lattatude": "6.8968386149822765, 79.87670392066796",
+    Latitude: "6.8968386149822765",
+    Longitude: " 79.87670392066796",
+  },
+};
+
+// console.log(data[0]);
 export { placesTypesApi, areaApi, spotsApi };

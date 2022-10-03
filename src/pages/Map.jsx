@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Autocomplete,
   Box,
@@ -29,6 +29,7 @@ import axios from "axios";
 import ChipButton from "../components/core/ChipButton";
 import AutocompletePlace from "../components/core/AutoComplete";
 import { placesTypesApi, areaApi, spotsApi } from "../api";
+
 const useStyles = makeStyles({
   root: {
     color: (props) => props.color,
@@ -61,13 +62,26 @@ const MapWrapper = (props) => {
   const [chips, setChips] = useState([]);
   const [illegalSpots, setIllegalSpots] = useState([]);
 
+  useEffect(() => {
+    // http://192.168.8.139:1000
+    axios
+      .get("http://192.168.8.108:8080", {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+        },
+      })
+      .then((res) => console.log(res.data))
+      .catch((err) => console.log(err));
+  }, []);
+
   const handleClick = () => {
     // axios
     //   .get("http://localhost:5000/get-place-type/hospitals")
     //   .then((res) => console.log(res.data))
     //   .catch((err) => console.log(err));
   };
-  
+
   const onLoad = () => {};
 
   const handleChip = (chip) => {

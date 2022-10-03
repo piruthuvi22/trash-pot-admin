@@ -10,9 +10,9 @@ const theme = createTheme({});
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      {/* <MapWrapper /> */}
+      <MapWrapper />
       {/* <ScheduleMgt /> */}
-      <CommonDashboard />
+      {/* <CommonDashboard /> */}
     </ThemeProvider>
   );
 }

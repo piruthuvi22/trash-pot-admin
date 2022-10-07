@@ -163,33 +163,34 @@ const MapWrapper = (props) => {
               center={center}
               zoom={14}
             >
-              {checked
-                ? illegalSpots.length > 0 &&
-                  illegalSpots.map((illegalSpot) => (
-                    <MarkerF
-                      // onLoad={onLoad}
-                      key={illegalSpot.Latitude + illegalSpot.Longitude}
-                      icon={{ url: "/trash-red.png" }}
-                      title={illegalSpot.Location}
-                      position={{
-                        lat: Number(illegalSpot.Latitude),
-                        lng: Number(illegalSpot.Longitude),
-                      }}
-                    />
-                  ))
-                : spots.length > 0 &&
-                  spots.map((spot) => (
-                    <MarkerF
-                      // onLoad={onLoad}
-                      key={spot.Latitude + spot.Longitude}
-                      icon={{ url: "/trash-black.png" }}
-                      title={spot.Location}
-                      position={{
-                        lat: Number(spot.Latitude),
-                        lng: Number(spot.Longitude),
-                      }}
-                    />
-                  ))}
+              {checked &&
+                illegalSpots.length > 0 &&
+                illegalSpots.map((illegalSpot) => (
+                  <MarkerF
+                    // onLoad={onLoad}
+                    key={illegalSpot.Latitude + illegalSpot.Longitude}
+                    icon={{ url: "/trash-red.png" }}
+                    title={illegalSpot.Location}
+                    position={{
+                      lat: Number(illegalSpot.Latitude),
+                      lng: Number(illegalSpot.Longitude),
+                    }}
+                  />
+                ))}
+              {!checked &&
+                spots.length > 0 &&
+                spots.map((spot) => (
+                  <MarkerF
+                    // onLoad={onLoad}
+                    key={spot.Latitude + spot.Longitude}
+                    icon={{ url: "/trash-black.png" }}
+                    title={spot.Location}
+                    position={{
+                      lat: Number(spot.Latitude),
+                      lng: Number(spot.Longitude),
+                    }}
+                  />
+                ))}
 
               <Polyline
                 // visible={true}

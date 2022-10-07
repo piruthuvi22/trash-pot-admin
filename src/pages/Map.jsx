@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   Autocomplete,
   Box,
+  Button,
+  Checkbox,
+  Chip,
   Container,
   Grid,
   Stack,
@@ -57,21 +60,27 @@ const mapContainer = {
 
 const MapWrapper = (props) => {
   const classes = useStyles();
-  const [value, setValue] = useState(areaApi[1]);
+  const [wardNames, setWardNames] = useState([]);
+  const [value, setValue] = useState(wardNames[0]);
   const [inputValue, setInputValue] = useState("");
   const [chips, setChips] = useState([]);
   const [illegalSpots, setIllegalSpots] = useState([]);
+  const [spots, setSpots] = useState([]);
+  const [isShowIllegalBtn, setIsShowIllegalBtn] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [selectedChip, setSelectedChip] = useState("");
 
   useEffect(() => {
-    // http://192.168.8.139:1000
+    // http://192.168.8.139:1000 me
+    //http://192.168.8.108:8080 tharee
     axios
-      .get("http://192.168.8.108:8080", {
+      .get("http://192.168.8.139:8081/wardname", {
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
         },
       })
-      .then((res) => console.log(res.data))
+      .then((res) => setWardNames(res.data))
       .catch((err) => console.log(err));
   }, []);
 
@@ -85,18 +94,62 @@ const MapWrapper = (props) => {
   const onLoad = () => {};
 
   const handleChip = (chip) => {
-    let spots = spotsApi.filter(
-      (spot) => spot.WardName === value && spot.LocationType === chip
-    );
-    setIllegalSpots(spots);
-    console.log(spots);
+    setSelectedChip(chip);
+    setChecked(false);
+    axios
+      .get("http://192.168.8.139:8081/locate", {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+        },
+        params: {
+          location: chip,
+        },
+      })
+      .then((res) => {
+        setSpots(res.data);
+      })
+      .catch((err) => console.log(err));
+
+    // get illegal spots
+    axios
+      .get("http://192.168.8.139:8081/ill_locate", {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+        },
+        params: {
+          location: chip,
+        },
+      })
+      .then((res) => {
+        setIllegalSpots(res.data);
+        setIsShowIllegalBtn(true);
+      })
+      .catch((err) => console.log(err));
   };
 
   const handleSelect = (val) => {
     setValue(val);
-    let types = placesTypesApi.filter((placesType) => placesType.area === val);
-    // console.log(types);
-    setChips(types[0].types);
+    setSelectedChip("");
+    setChecked(false);
+
+    axios
+      .get("http://192.168.8.139:8081/loctypes", {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+        },
+        params: {
+          WardName: val,
+        },
+      })
+      .then((res) => setChips(res.data))
+      .catch((err) => console.log(err));
+  };
+
+  const handleShowIllegalSpots = () => {
+    setChecked(!checked);
   };
 
   return (
@@ -110,19 +163,33 @@ const MapWrapper = (props) => {
               center={center}
               zoom={14}
             >
-              {illegalSpots.length > 0 &&
-                illegalSpots.map((illegalSpot) => (
-                  <MarkerF
-                    // onLoad={onLoad}
-                    key={illegalSpot.Latitude + illegalSpot.Longitude}
-                    icon={{ url: "/trash-icon.png" }}
-                    title={illegalSpot.Location}
-                    position={{
-                      lat: Number(illegalSpot.Latitude),
-                      lng: Number(illegalSpot.Longitude),
-                    }}
-                  />
-                ))}
+              {checked
+                ? illegalSpots.length > 0 &&
+                  illegalSpots.map((illegalSpot) => (
+                    <MarkerF
+                      // onLoad={onLoad}
+                      key={illegalSpot.Latitude + illegalSpot.Longitude}
+                      icon={{ url: "/trash-red.png" }}
+                      title={illegalSpot.Location}
+                      position={{
+                        lat: Number(illegalSpot.Latitude),
+                        lng: Number(illegalSpot.Longitude),
+                      }}
+                    />
+                  ))
+                : spots.length > 0 &&
+                  spots.map((spot) => (
+                    <MarkerF
+                      // onLoad={onLoad}
+                      key={spot.Latitude + spot.Longitude}
+                      icon={{ url: "/trash-black.png" }}
+                      title={spot.Location}
+                      position={{
+                        lat: Number(spot.Latitude),
+                        lng: Number(spot.Longitude),
+                      }}
+                    />
+                  ))}
 
               <Polyline
                 // visible={true}
@@ -146,6 +213,7 @@ const MapWrapper = (props) => {
                   zIndex: 1,
                 }}
               ></Polyline>
+
               <Box className={classes.chipsWrapper}>
                 <Stack direction={"row"} alignItems="center" height="50%">
                   <Autocomplete
@@ -156,7 +224,7 @@ const MapWrapper = (props) => {
                       setInputValue(newInputValue)
                     }
                     id="controllable-states-demo"
-                    options={areaApi}
+                    options={wardNames}
                     size={"small"}
                     sx={{
                       width: 300,
@@ -175,6 +243,15 @@ const MapWrapper = (props) => {
                   />
 
                   {/* <AutocompletePlace /> */}
+                  {selectedChip && (
+                    <>
+                      <Checkbox
+                        checked={checked}
+                        onChange={handleShowIllegalSpots}
+                      />
+                      <h4>Illegal Spots</h4>
+                    </>
+                  )}
                 </Stack>
                 <Stack
                   direction={"row"}
@@ -183,16 +260,27 @@ const MapWrapper = (props) => {
                   height="50%"
                 >
                   {chips.length > 0 &&
-                    chips.map((chip, index) => (
-                      <ChipButton
-                        key={chip + index}
-                        variant="contained"
-                        disableElevation
-                        onClick={() => handleChip(chip)}
-                      >
-                        {chip}
-                      </ChipButton>
-                    ))}
+                    chips.map((chip, index) =>
+                      selectedChip == chip ? (
+                        <Chip
+                          key={chip + index}
+                          variant="contained"
+                          disableElevation
+                          label={chip}
+                          color="success"
+                          onClick={() => handleChip(chip)}
+                        />
+                      ) : (
+                        <Chip
+                          key={chip + index}
+                          variant="contained"
+                          disableElevation
+                          label={chip}
+                          color="primary"
+                          onClick={() => handleChip(chip)}
+                        />
+                      )
+                    )}
                 </Stack>
               </Box>
             </GoogleMap>
